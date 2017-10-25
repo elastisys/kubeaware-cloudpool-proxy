@@ -1,5 +1,8 @@
 # kubeaware-cloudpool-proxy
-The kubeaware-cloudpool-proxy is a proxy that is placed between a cloudpool and its clients (for example, an autoscaler). In essence, the kubeaware-cloudpool-proxy adds Kubernetes-awareness to an existing cloudpool implementation. The Kubernetes-awareness allows worker node scale-downs to be handled with less
+The `kubeaware-cloudpool-proxy` is a proxy that is placed between a 
+[cloudpool](http://cloudpoolrestapi.readthedocs.io) and its clients (for example, an autoscaler). 
+In essence, the `kubeaware-cloudpool-proxy` adds Kubernetes-awareness to an existing cloudpool 
+implementation. The Kubernetes-awareness allows worker node scale-downs to be handled with less
 disruption by taking the current Kubernetes cluster state into account, carefully selecting a node,
 and evacuating its pods prior to terminating the cloud machine instead of just brutally killing a "random" worker node (at least appearing "random" from the Kubernetes-perspective).
 
@@ -31,8 +34,8 @@ nodes in a controlled manner by:
   - the node must not be a master node (as indicated by it running a pod in namespace `kube-system` named 
     `kube-apiserver-<host>` or having a `component` label with value `kube-apiserver`)
   - there must be other remaining non-master nodes that are `Ready` and `Schedulable`
-  - the node's pods must be possible to evacuate to the remainin nodes:
-    - the sum of pod-requested CPU/memory on the node muse not exceed free space on remaining nodes
+  - the node's pods must be possible to evacuate to the remaining nodes:
+    - the sum of pod-requested CPU/memory on the node must not exceed free space on remaining nodes
     - the node must not have any pods without [controller](https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller/) (such as deployment/replication controller),
       since such pods would not be recreated on a different node when evicted.
     - the node must not have any pods with (node-)local storage
@@ -50,15 +53,16 @@ nodes in a controlled manner by:
   - The node is marked unschedulable via a node taint (to avoid new pods being scheduled onto the node).
   - The node is drained: all non-system pods are evicted (and will be rescheduled to the remaining nodes).
   - The node is deleted from the Kubernetes cluster.
-  - Finally, the node is terminated in the cloud through the [terminate machine]   
-    (http://cloudpoolrestapi.readthedocs.io/en/latest/api.html#terminate-machine) call to the backend cloudpool.
+  - Finally, the node is terminated in the cloud through the 
+    [terminate machine](http://cloudpoolrestapi.readthedocs.io/en/latest/api.html#terminate-machine) 
+    call to the backend cloudpool.
 
 
 ## Building
 [dep](https://github.com/golang/dep) is used for dependency management. 
 Make sure it is [installed](https://github.com/golang/dep/releases).
 
-First ensure that all dependencies are downloaded to the `vendor` directory.
+Next, ensure that all dependencies are downloaded to the `vendor` directory.
 
     dep ensure
 
@@ -66,6 +70,7 @@ Then run the `build.sh` script to build all binaries under `cmd/` and run all
 tests (`build.sh --help` for build options).
 
 Built binaries are placed under `bin`. The main binary is `kubeaware-cloudpool-proxy`.
+
 Test coverage output is placed under `build/coverage/` and can be viewed as HTML 
 via:
 
@@ -137,7 +142,11 @@ To build a docker image, run
 
 To run the docker image, run something similar to:
 
-    docker run --rm -p 8080:8080 -v <config-dir>:/etc/elastisys -v <kubessl-dir>:/etc/kubessl elastisys/kubeaware-cloudpool-proxy:1.0.0 --config-file=/etc/elastisys/config.json --port 8080
+    docker run --rm -p 8080:8080 \
+       -v <config-dir>:/etc/elastisys \
+       -v <kubessl-dir>:/etc/kubessl \
+       elastisys/kubeaware-cloudpool-proxy:1.0.0 \
+       --config-file=/etc/elastisys/config.json --port 8080
 
 In this example, `<config-dir>` is a host directory that contains a `config.json` file
 for the `kubeaware-cloudpool-proxy`. Furthermore, `<kubessl-dir>` must contain the 
@@ -175,7 +184,7 @@ to get the right version into the `vendor` folder.
 
 
 ### Testing
-The regular `go test` can be used for testing.
+The regular `go test` command can be used for testing.
 
 To test a certain package, and to see logs (for a certain glog v-level), run something like:
     
@@ -200,10 +209,10 @@ This can be achieved via the [mockery](https://github.com/vektra/mockery) tool.
 
 ### Useful references
 
-[1] [kubectl drain code](https://github.com/kubernetes/kubernetes/blob/master/pkg/kubectl/cmd/drain.go)
-[2] [cluster autoscaler scale-down code](https://github.com/kubernetes/autoscaler/blob/cluster-autoscaler-1.0.0/cluster-autoscaler/core/scale_down.go)
-[3] [kubernetes scheduler overview](https://github.com/kubernetes/community/blob/8decfe42b8cc1e027da290c4e98fa75b3e98e2cc/contributors/devel/scheduler.md)
-[4] [kubernetes scheduler predicates code](https://github.com/kubernetes/kubernetes/blob/v1.8.2/plugin/pkg/scheduler/algorithm/predicates/predicates.go)
+- [1] [kubectl drain code](https://github.com/kubernetes/kubernetes/blob/master/pkg/kubectl/cmd/drain.go)
+- [2] [cluster autoscaler scale-down code](https://github.com/kubernetes/autoscaler/blob/cluster-autoscaler-1.0.0/cluster-autoscaler/core/scale_down.go)
+- [3] [kubernetes scheduler overview](https://github.com/kubernetes/community/blob/8decfe42b8cc1e027da290c4e98fa75b3e98e2cc/contributors/devel/scheduler.md)
+- [4] [kubernetes scheduler predicates code](https://github.com/kubernetes/kubernetes/blob/v1.8.2/plugin/pkg/scheduler/algorithm/predicates/predicates.go)
 
 ### Ideas for future work
 In some cases, we would like to see more rapid utilization of newly introduced worker nodes, 
