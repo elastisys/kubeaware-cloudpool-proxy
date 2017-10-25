@@ -1,0 +1,6 @@
+*~
+bin
+main
+vendor
+.vscode
+*.out

@@ -1,0 +1,29 @@
+#
+# Project dependencies
+#
+# Refer to https://github.com/golang/dep/blob/master/docs/Gopkg.toml.md
+# for detailed Gopkg.toml documentation.
+#
+
+# client-go libary and some constraints required to get the correct versions of client-go's dependencies.
+[[constraint]]
+  name    = "k8s.io/client-go"
+  version = "v4.0.0"
+# See https://github.com/kubernetes/client-go/issues/298
+[[override]]
+  name = "github.com/ugorji/go"
+  revision = "8c0409fcbb70099c748d71f714529204975f6c3f"
+# See https://github.com/kubernetes/client-go/issues/278
+[[override]]
+  name = "k8s.io/apimachinery"
+  branch = "release-1.7"
+
+# a more user-friendly http request dispatcher
+[[constraint]]
+  name    = "github.com/gorilla/mux"
+  version = "v1.5.0"
+
+# simplify test-code
+[[constraint]]
+  name    = "github.com/stretchr/testify"
+  version = "v1.1.4"
