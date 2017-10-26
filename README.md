@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/elastisys/kubeaware-cloudpool-proxy.svg?branch=master)](https://travis-ci.org/elastisys/kubeaware-cloudpool-proxy)
+
+
 # kubeaware-cloudpool-proxy
 The `kubeaware-cloudpool-proxy` is a proxy that is placed between a 
 [cloudpool](http://cloudpoolrestapi.readthedocs.io) and its clients (for example, an autoscaler). 
