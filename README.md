@@ -66,10 +66,9 @@ Next, ensure that all dependencies are downloaded to the `vendor` directory.
 
     dep ensure
 
-Then run the `build.sh` script to build all binaries under `cmd/` and run all 
-tests (`build.sh --help` for build options).
+Then run `build.sh` to build the binary and run all tests (`build.sh --help` for build options).
 
-Built binaries are placed under `bin`. The main binary is `kubeaware-cloudpool-proxy`.
+The built binary is placed under `bin`. The main binary is `kubeaware-cloudpool-proxy`.
 
 Test coverage output is placed under `build/coverage/` and can be viewed as HTML 
 via:
