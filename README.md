@@ -1,5 +1,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/elastisys/kubeaware-cloudpool-proxy)](https://goreportcard.com/report/github.com/elastisys/kubeaware-cloudpool-proxy)
 [![Build Status](https://travis-ci.org/elastisys/kubeaware-cloudpool-proxy.svg?branch=master)](https://travis-ci.org/elastisys/kubeaware-cloudpool-proxy)
+[![Coverage](https://codecov.io/gh/elastisys/kubeaware-cloudpool-proxy/branch/master/graph/badge.svg)](https://codecov.io/gh/elastisys/kubeaware-cloudpool-proxy)
+
 
 
 # kubeaware-cloudpool-proxy
