@@ -1,6 +1,6 @@
 *~
 bin
+build
 main
-vendor
 .vscode
 *.out

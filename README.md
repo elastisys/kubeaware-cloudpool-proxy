@@ -59,14 +59,8 @@ nodes in a controlled manner by:
 
 
 ## Building
-[dep](https://github.com/golang/dep) is used for dependency management. 
-Make sure it is [installed](https://github.com/golang/dep/releases).
 
-Next, ensure that all dependencies are downloaded to the `vendor` directory.
-
-    dep ensure
-
-Then run `build.sh` to build the binary and run all tests (`build.sh --help` for build options).
+`build.sh` builds the binary and runs all tests (`build.sh --help` for build options).
 
 The built binary is placed under `bin`. The main binary is `kubeaware-cloudpool-proxy`.
 
@@ -173,6 +167,8 @@ something like:
 ## Developer notes
 
 ### Dependencies
+[dep](https://github.com/golang/dep) is used for dependency management. 
+Make sure it is [installed](https://github.com/golang/dep/releases).
 
 To introduce a new dependency, add it to `Gopkg.toml`, edit some piece of
 code to import a package from the dependency, and then run:
