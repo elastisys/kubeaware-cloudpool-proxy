@@ -2,4 +2,5 @@ language: go
 
 go:
   - 1.9
+install: # empty: all dependencies are vendored  
 script: go test -v -cover ./pkg/...
