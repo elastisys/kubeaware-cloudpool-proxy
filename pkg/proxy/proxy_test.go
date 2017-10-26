@@ -388,8 +388,6 @@ func TestSetDesiredSizeOnScaleDownWhenNoSafeCandidateIsFound(t *testing.T) {
 	assert.NotNil(t, err, "SetDesiredSize expectede to fail")
 	assert.IsType(t, &NoViableScaleDownCandidateError{}, err, "unexpected error type")
 
-	t.Logf("error: %s", err)
-
 	//  verify that expected calls were made on the clients
 	mockCloudPool.AssertExpectations(t)
 	mockNodeScaler.AssertExpectations(t)
@@ -704,6 +702,5 @@ func TestSetDesiredSizeOnScaleDownError(t *testing.T) {
 		err := proxy.SetDesiredSize(1)
 		assert.NotNil(t, err, "SetDesiredSize expected to fail")
 		assert.IsType(t, test.expectedErrorType, err, "unexpected error type")
-		t.Logf("error: %s", err)
 	}
 }
