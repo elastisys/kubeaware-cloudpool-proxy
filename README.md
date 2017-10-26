@@ -1,5 +1,4 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/elastisys/kubeaware-cloudpool-proxy)](https://goreportcard.com/report/github.com/elastisys/kubeaware-cloudpool-proxy)
-
 [![Build Status](https://travis-ci.org/elastisys/kubeaware-cloudpool-proxy.svg?branch=master)](https://travis-ci.org/elastisys/kubeaware-cloudpool-proxy)
 
 
