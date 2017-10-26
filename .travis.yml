@@ -2,5 +2,6 @@ language: go
 
 go:
   - 1.9
-install: # empty: all dependencies are vendored  
+# skip "go get -t ./..." since all dependencies are vendored    
+install: true 
 script: go test -v -cover ./pkg/...
