@@ -8,6 +8,10 @@ scriptdir=$(dirname ${0})
 run_tests=true
 build_docker_image=false
 
+commit=$(git log -n 1 --pretty=format:%h)
+version="$(cat ${scriptdir}/VERSION.txt)-${commit}"
+echo "[${scriptname}] building version ${version} ..."
+
 for arg in $@; do
     case ${arg} in
 	--notest)
@@ -46,7 +50,8 @@ function build() {
     destdir=./bin
     mkdir -p ${destdir}
     echo "[${scriptname}] building ${cmd} under ${destdir}/${cmd} ..."
-    go build -o ${destdir}/${cmd} ./cmd/${cmd}
+    
+    go build -ldflags "-X main.version=${version}" -o ${destdir}/${cmd} ./cmd/${cmd}
 
     popd > /dev/null
 }

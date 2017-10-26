@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -14,9 +15,15 @@ import (
 	"github.com/elastisys/kubeaware-cloudpool-proxy/pkg/proxy"
 )
 
+// version is the release version of the program. This is intended to be
+// set by the linker at build-time
+var version string
+
+// Command-line options
 var (
-	configPath string
-	port       int
+	configPath  string
+	port        int
+	showVersion bool
 )
 
 func init() {
@@ -26,6 +33,7 @@ func init() {
 	)
 	flag.StringVar(&configPath, "config-file", defaultConfigPath, "JSON-formatted configuration file.")
 	flag.IntVar(&port, "port", defaultPort, "Port used to serve REST API")
+	flag.BoolVar(&showVersion, "version", false, "Show version")
 
 	// make glog write to stderr by default by setting --logtostderr to true
 	flag.Lookup("logtostderr").Value.Set("true")
@@ -38,6 +46,11 @@ func main() {
 
 	// make sure any buffered output gets written when we exit
 	defer glog.Flush()
+
+	if showVersion {
+		fmt.Printf("Version: %s\n", version)
+		os.Exit(0)
+	}
 
 	configFile, err := os.Open(configPath)
 	if err != nil {
