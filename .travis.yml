@@ -4,4 +4,7 @@ go:
   - 1.9
 # skip "go get -t ./..." since all dependencies are vendored    
 install: true 
-script: go test -v -cover ./pkg/...
+script: ./build.sh --nobin
+after_success:
+  # upload code coverage report to codecov.io
+  - bash <(curl -s https://codecov.io/bash) -s build/coverage/
