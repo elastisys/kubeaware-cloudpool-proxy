@@ -96,7 +96,7 @@ It has the following structure:
   },
 
   "backend": {
-      "cloudPoolUrl": "http://<host>:<port>",
+      "url": "http://<host>:<port>",
       "timeout": "300s",
   }
 
@@ -157,7 +157,7 @@ The fields carry the following semantics:
         server.  Ignored if `kubeConfigPath` is specified.
     - `timeout`: request timeout used when communicating with the API server. Default: `60s`.
   - `backend`: settings for communicating with the backend cloudpool that the proxy sits in front of.
-    - `cloudPoolUrl`: the base URL where the
+    - `url`: the base URL where the
       [cloudpool REST API](http://cloudpoolrestapi.readthedocs.io/en/latest/api.html) can be reached.
       For example, `http://cloudpool:9010`.
     - `timeout`: the connection timeout to use when contacting the backend. Default: `300s`.
