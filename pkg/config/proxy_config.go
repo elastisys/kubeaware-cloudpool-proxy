@@ -59,11 +59,20 @@ type APIServerConfig struct {
 
 // APIServerAuthConfig represents credentials used to authenticate against the Kubernetes API server.
 type APIServerAuthConfig struct {
+	// KubeConfigPath is a file system path to a kubeconfig file, the type of
+	// configuration file that is used by `kubectl`. When specified, any other
+	// auth fields are ignored (as they are all included in the kubeconfig).
+	// The kubeconfig must contain cluster credentials for a cluster with the
+	// specified API server URL.
+	KubeConfigPath string `json:"kubeConfigPath"`
 	// ClientCertPath is a file system path to a pem-encoded API server client/admin cert.
+	// Ignored if KubeConfigPath is specified.
 	ClientCertPath string `json:"clientCertPath"`
 	// ClientKeyPath is a file system path to a pem-encoded API server client/admin key.
+	// Ignored if KubeConfigPath is specified.
 	ClientKeyPath string `json:"clientKeyPath"`
 	// CACertPath is a file system path to a pem-encoded CA cert for the API server.
+	// Ignored if KubeConfigPath is specified.
 	CACertPath string `json:"caCertPath"`
 }
 
@@ -125,6 +134,10 @@ func (config *APIServerConfig) Validate() error {
 
 // Validate validates the presence of mandatory values in an APIServerAuthConfig
 func (config *APIServerAuthConfig) Validate() error {
+	if config.KubeConfigPath != "" {
+		return nil
+	}
+
 	if config.ClientCertPath == "" {
 		return fmt.Errorf("missing value: clientCertPath")
 	}

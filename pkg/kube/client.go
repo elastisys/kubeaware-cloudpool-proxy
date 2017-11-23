@@ -6,6 +6,8 @@ import (
 	"github.com/elastisys/kubeaware-cloudpool-proxy/pkg/config"
 	"k8s.io/client-go/kubernetes"
 	kuberest "k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apiv1 "k8s.io/client-go/pkg/api/v1"
@@ -32,21 +34,88 @@ func NewKubeClient(config *config.APIServerConfig) (KubeClient, error) {
 		return nil, fmt.Errorf("API server config is invalid: %s", err)
 	}
 
-	kubeConfig := &kuberest.Config{
-		Host: config.URL,
-		TLSClientConfig: kuberest.TLSClientConfig{
+	var err error
+	var tlsConfig *kuberest.TLSClientConfig
+
+	if config.Auth.KubeConfigPath != "" {
+		kubeConfig, err := clientcmd.LoadFromFile(config.Auth.KubeConfigPath)
+		if err != nil {
+			return nil, fmt.Errorf("failed to load kubeconfig %s: %s", config.Auth.KubeConfigPath, err)
+		}
+		tlsConfig, err = tlsClientConfigFromKubeConfig(kubeConfig, config.URL)
+		if err != nil {
+			return nil, fmt.Errorf("failed to load auth credentials from kubeconfig %s: %s",
+				config.Auth.KubeConfigPath, err)
+		}
+	} else {
+		tlsConfig = &kuberest.TLSClientConfig{
 			CertFile: config.Auth.ClientCertPath,
 			KeyFile:  config.Auth.ClientKeyPath,
 			CAFile:   config.Auth.CACertPath,
-		},
-		Timeout: config.Timeout.Duration,
+		}
 	}
-	kubeClient, err := kubernetes.NewForConfig(kubeConfig)
+
+	clientConfig := &kuberest.Config{
+		Host:            config.URL,
+		TLSClientConfig: *tlsConfig,
+		Timeout:         config.Timeout.Duration,
+	}
+
+	kubeClient, err := kubernetes.NewForConfig(clientConfig)
 	if err != nil {
 		return nil, fmt.Errorf("could not create kubernetes client: %s", err)
 	}
 
 	return &DefaultKubeClient{api: kubeClient}, nil
+}
+
+// tlsClientConfigFromKubeConfig extracts client TLS credentials from
+// a kubeconfig file for a given cluster API server. If no such cluster
+// credentials can be found, an error is returned.
+func tlsClientConfigFromKubeConfig(kubeconfig *clientcmdapi.Config, apiServerURL string) (*kuberest.TLSClientConfig, error) {
+	tlsConfig := kuberest.TLSClientConfig{}
+
+	// first find the cluster in kubeconfig with matching api server
+	// (it holds the apiserver's ca cert)
+	var kubeconfigClusterName string
+	for clusterName, cluster := range kubeconfig.Clusters {
+		if cluster.Server == apiServerURL {
+			kubeconfigClusterName = clusterName
+			// may either be specified as file path or data
+			tlsConfig.CAFile = cluster.CertificateAuthority
+			tlsConfig.CAData = cluster.CertificateAuthorityData
+			break
+		}
+	}
+
+	if kubeconfigClusterName == "" {
+		return nil, fmt.Errorf("kubeconfig does not contain a cluster with api server %s", apiServerURL)
+	}
+
+	// next find a context associated with cluster
+	var contextUser string
+	for _, context := range kubeconfig.Contexts {
+		if context.Cluster == kubeconfigClusterName {
+			contextUser = context.AuthInfo
+		}
+	}
+	if contextUser == "" {
+		return nil, fmt.Errorf("kubeconfig does not contain a context for a cluster with api server %s", apiServerURL)
+	}
+
+	// next find the user matching the context (it holds the client cert and key)
+	for userName, user := range kubeconfig.AuthInfos {
+		if userName == contextUser {
+			// may either be specified as file path or data
+			tlsConfig.CertFile = user.ClientCertificate
+			tlsConfig.CertData = user.ClientCertificateData
+			tlsConfig.KeyFile = user.ClientKey
+			tlsConfig.KeyData = user.ClientKeyData
+			return &tlsConfig, nil
+		}
+	}
+
+	return nil, fmt.Errorf("kubeconfig does not contain a user named %s", contextUser)
 }
 
 // DefaultKubeClient is an implementation of the KubeClient interface.

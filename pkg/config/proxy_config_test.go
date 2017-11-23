@@ -7,7 +7,43 @@ import (
 )
 
 var (
-	CompleteConfigJSON = `
+	KubeConfigAuthJSON = `
+{
+	"server": {
+		"timeout": "123s"
+	},
+  
+	"apiServer": {
+		"url": "http://sample.apiserver:6443",
+		"auth": {
+		  "kubeConfigPath": "/home/me/.kube/config"
+		},
+		"timeout": "5m"
+	},
+  
+	"backend": {
+		"url": "http://sample.cloudpool",
+		"timeout": "1m35s"
+	}
+}
+`
+
+	// expected struct
+	KubeConfigAuthConfig = &ProxyConfig{
+		Server: ServerConfig{Timeout: Duration{123 * time.Second}},
+		APIServer: APIServerConfig{
+			URL: "http://sample.apiserver:6443",
+			Auth: APIServerAuthConfig{
+				KubeConfigPath: "/home/me/.kube/config",
+			},
+			Timeout: Duration{5 * time.Minute},
+		},
+		Backend: BackendConfig{URL: "http://sample.cloudpool", Timeout: Duration{95 * time.Second}},
+	}
+)
+
+var (
+	CertAuthConfigJSON = `
 {
 	"server": {
 		"timeout": "123s"
@@ -31,7 +67,7 @@ var (
 `
 
 	// expected struct
-	CompleteConfig = &ProxyConfig{
+	CertAuthConfig = &ProxyConfig{
 		Server: ServerConfig{Timeout: Duration{123 * time.Second}},
 		APIServer: APIServerConfig{
 			URL: "http://sample.apiserver:6443",
@@ -51,9 +87,7 @@ var (
 	"apiServer": {
 		"url": "http://sample.apiserver:6443",
 		"auth": {
-		  "clientCertPath": "/etc/ssl/admin.pem",
-		  "clientKeyPath": "/etc/ssl/admin-key.pem",
-		  "caCertPath": "/etc/ssl/ca.pem"
+		  "kubeConfigPath": "/home/me/.kube/config"
 		}
 	},
   
@@ -68,9 +102,8 @@ var (
 		APIServer: APIServerConfig{
 			URL: "http://sample.apiserver:6443",
 			Auth: APIServerAuthConfig{
-				ClientCertPath: "/etc/ssl/admin.pem",
-				ClientKeyPath:  "/etc/ssl/admin-key.pem",
-				CACertPath:     "/etc/ssl/ca.pem"},
+				KubeConfigPath: "/home/me/.kube/config",
+			},
 			Timeout: Duration{DefaultAPIServerTimeout},
 		},
 		Backend: BackendConfig{URL: "http://sample.cloudpool", Timeout: Duration{DefaultBackendTimeout}},
@@ -121,7 +154,8 @@ func TestNewFromJSON(t *testing.T) {
 		expected      *ProxyConfig
 		errorExpected bool
 	}{
-		{name: "complete config", input: CompleteConfigJSON, expected: CompleteConfig, errorExpected: false},
+		{name: "kubeconfig-auth config", input: KubeConfigAuthJSON, expected: KubeConfigAuthConfig, errorExpected: false},
+		{name: "cert-auth config", input: CertAuthConfigJSON, expected: CertAuthConfig, errorExpected: false},
 		// verifies default values
 		{name: "minimal config", input: MinimalConfigJSON, expected: MinimalConfig, errorExpected: false},
 		// check URLs
