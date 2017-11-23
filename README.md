@@ -90,9 +90,7 @@ It has the following structure:
   "apiServer": {
       "url": "https://<host>:<port>",
       "auth": {
-        "clientCertPath": "/path/to/admin.pem",
-        "clientKeyPath": "/path/to/admin-key.pem",
-        "caCertPath": "/path/to/ca.pem",
+        ... authentication mechanism ...
       },
       "timeout": "10s",
   },
