@@ -73,6 +73,7 @@ func (s *Server) ListenAndServe() error {
 
 // HandleSetDesiredSize handles a `POST /pool/size` request by passing it to the proxy.
 func (s *Server) HandleSetDesiredSize(w http.ResponseWriter, r *http.Request) {
+	glog.V(0).Infof("handling %s %s", r.Method, r.RequestURI)
 	bytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		writeErrorResponse(w, http.StatusBadRequest,
@@ -109,6 +110,7 @@ func (s *Server) HandleSetDesiredSize(w http.ResponseWriter, r *http.Request) {
 
 // HandleTerminateMachine handles a `POST /pool/terminate` request by passing it to the proxy.
 func (s *Server) HandleTerminateMachine(w http.ResponseWriter, r *http.Request) {
+	glog.V(0).Infof("handling %s %s", r.Method, r.RequestURI)
 	bytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		writeErrorResponse(w, http.StatusBadRequest,
@@ -146,6 +148,7 @@ func (s *Server) HandleTerminateMachine(w http.ResponseWriter, r *http.Request) 
 // ForwardToBackend forwards the incoming request to the backend cloudpool and
 // responds to the client with response retrieved from the backend cloudpool.
 func (s *Server) ForwardToBackend(w http.ResponseWriter, r *http.Request) {
+	glog.V(0).Infof("forwarding %s %s to backend", r.Method, r.RequestURI)
 	backendResponse, err := s.proxy.Forward(r)
 	if err != nil {
 		writeErrorResponse(w, http.StatusBadGateway,
