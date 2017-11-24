@@ -98,9 +98,10 @@ if ${build_docker_image}; then
     # build for alpine (which uses a different libc)
     echo "[${scriptname}] building alpine-specific binary ..."
     CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo \
+	       -ldflags "-X main.version=${version}" \
 	       -o build/kubeaware-cloudpool-proxy-alpine \
 	       ./cmd/kubeaware-cloudpool-proxy
-
+		   
     version=$(cat VERSION.txt)
     tag="elastisys/kubeaware-cloudpool-proxy:${version}"
     echo "[${scriptname}] building docker image ${tag} ..."
