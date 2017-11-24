@@ -259,7 +259,7 @@ func TestSetDesiredSize(t *testing.T) {
 	var setDesiredSizeMsg SetDesiredSizeMessage
 	e := json.Unmarshal([]byte(fakeBackend.Requests[0].Body), &setDesiredSizeMsg)
 	assert.Nil(t, e, "client did not send a SetDesiredSizeMessage to backend")
-	assert.Equal(t, expectedDesiredSize, setDesiredSizeMsg.DesiredSize, "client set wrong desired size on backend")
+	assert.Equal(t, expectedDesiredSize, *setDesiredSizeMsg.DesiredSize, "client set wrong desired size on backend")
 }
 
 // Verify that an error response results in a proper ErrorMessage return value

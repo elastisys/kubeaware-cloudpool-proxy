@@ -111,7 +111,7 @@ func (c *DefaultCloudPoolClient) GetMachine(machineID string) (*Machine, error) 
 
 // SetDesiredSize sets the desired size on the backend cloudpool.
 func (c *DefaultCloudPoolClient) SetDesiredSize(desiredSize int) error {
-	messageBytes, e := json.Marshal(&SetDesiredSizeMessage{desiredSize})
+	messageBytes, e := json.Marshal(&SetDesiredSizeMessage{&desiredSize})
 	if e != nil {
 		return &ErrorMessage{Message: "setDesiredSize: failed to encode request message", Detail: e.Error()}
 	}

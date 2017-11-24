@@ -46,9 +46,9 @@ func NewServer(proxy CloudPoolProxy, port int, readTimeout time.Duration) *Serve
 	// set up request dispatching logic
 	router := mux.NewRouter()
 	// setDesiredSize requires special treatment
-	router.HandleFunc("/pool/size", server.HandleSetDesiredSize).Methods("POST").Headers("Content-Type", "application/json")
+	router.HandleFunc("/pool/size", server.HandleSetDesiredSize).Methods("POST")
 	// terminateMachine requires special treatment
-	router.HandleFunc("/pool/terminate", server.HandleTerminateMachine).Methods("POST").Headers("Content-Type", "application/json")
+	router.HandleFunc("/pool/terminate", server.HandleTerminateMachine).Methods("POST")
 	// all other routes are to be forwarded immediately to the backend
 	router.PathPrefix("/").HandlerFunc(server.ForwardToBackend)
 
@@ -73,7 +73,7 @@ func (s *Server) ListenAndServe() error {
 
 // HandleSetDesiredSize handles a `POST /pool/size` request by passing it to the proxy.
 func (s *Server) HandleSetDesiredSize(w http.ResponseWriter, r *http.Request) {
-	glog.V(0).Infof("handling %s %s", r.Method, r.RequestURI)
+	glog.V(0).Infof("handling %s %s called by %s", r.Method, r.RequestURI, r.RemoteAddr)
 	bytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		writeErrorResponse(w, http.StatusBadRequest,
@@ -89,15 +89,15 @@ func (s *Server) HandleSetDesiredSize(w http.ResponseWriter, r *http.Request) {
 			cloudpool.ErrorWithCause(err, "failed to decode setDesiredSize message"))
 		return
 	}
-	if setDesiredSizeMsg.DesiredSize < 0 {
-		writeErrorResponse(w, http.StatusBadRequest,
-			&cloudpool.ErrorMessage{Message: "desired size must be non-negative"})
+	err = setDesiredSizeMsg.Validate()
+	if err != nil {
+		writeErrorResponse(w, http.StatusBadRequest, &cloudpool.ErrorMessage{Message: err.Error()})
 		return
 	}
 
 	// ensure concurrent updates are not allowed
 	s.updateLock.Lock()
-	err = s.proxy.SetDesiredSize(setDesiredSizeMsg.DesiredSize)
+	err = s.proxy.SetDesiredSize(*setDesiredSizeMsg.DesiredSize)
 	s.updateLock.Unlock()
 
 	if err != nil {
@@ -110,7 +110,7 @@ func (s *Server) HandleSetDesiredSize(w http.ResponseWriter, r *http.Request) {
 
 // HandleTerminateMachine handles a `POST /pool/terminate` request by passing it to the proxy.
 func (s *Server) HandleTerminateMachine(w http.ResponseWriter, r *http.Request) {
-	glog.V(0).Infof("handling %s %s", r.Method, r.RequestURI)
+	glog.V(0).Infof("handling %s %s called by %s", r.Method, r.RequestURI, r.RemoteAddr)
 	bytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		writeErrorResponse(w, http.StatusBadRequest,
@@ -126,9 +126,9 @@ func (s *Server) HandleTerminateMachine(w http.ResponseWriter, r *http.Request) 
 			cloudpool.ErrorWithCause(err, "failed to decode terminateMachine message"))
 		return
 	}
-	if terminateMachineMsg.MachineID == "" {
-		writeErrorResponse(w, http.StatusBadRequest,
-			&cloudpool.ErrorMessage{Message: "terminateMachine message missing 'machineId'"})
+	err = terminateMachineMsg.Validate()
+	if err != nil {
+		writeErrorResponse(w, http.StatusBadRequest, &cloudpool.ErrorMessage{Message: err.Error()})
 		return
 	}
 
@@ -148,7 +148,7 @@ func (s *Server) HandleTerminateMachine(w http.ResponseWriter, r *http.Request) 
 // ForwardToBackend forwards the incoming request to the backend cloudpool and
 // responds to the client with response retrieved from the backend cloudpool.
 func (s *Server) ForwardToBackend(w http.ResponseWriter, r *http.Request) {
-	glog.V(0).Infof("forwarding %s %s to backend", r.Method, r.RequestURI)
+	glog.V(0).Infof("forwarding %s %s from %s to backend", r.Method, r.RequestURI, r.RemoteAddr)
 	backendResponse, err := s.proxy.Forward(r)
 	if err != nil {
 		writeErrorResponse(w, http.StatusBadGateway,

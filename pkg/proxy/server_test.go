@@ -369,15 +369,29 @@ func TestSetDesiredSizeOnBadRequest(t *testing.T) {
 		},
 		// on illegal desiredSize => 400 (Bad Request)
 		{
-			name:   "setDesiredSize on missing machineId",
+			name:   "setDesiredSize on missing illegal size",
 			method: "POST",
 			path:   "/pool/size",
 			body:   `{"desiredSize": -3}`,
 			expectedServerResponseCode: 400,
 		},
+		{
+			name:   "setDesiredSize on message without desiredSize",
+			method: "POST",
+			path:   "/pool/size",
+			body:   `{"dezziredSize": 1}`,
+			expectedServerResponseCode: 400,
+		},
 	}
 
 	for _, test := range tests {
+		// a fake CloudPoolProxy.SetDesiredSize method
+		setDesiredSizeHandler := func(desiredSize int) error {
+			t.Logf("proxy called with desiredSize %d\n", desiredSize)
+			return nil
+		}
+		fakeCloudPoolProxy.SetDesiredSizeHandler = setDesiredSizeHandler
+
 		req, _ := http.NewRequest(test.method, httpServer.URL+test.path,
 			ioutil.NopCloser(strings.NewReader(test.body)))
 		resp, err := doJSONRequest(req)

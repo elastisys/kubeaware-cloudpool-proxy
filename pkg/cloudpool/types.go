@@ -36,12 +36,23 @@ func (err *ErrorMessage) String() string {
 // to /pool/size
 type SetDesiredSizeMessage struct {
 	// DesiredSize is the desiredSize of the cloudpool
-	DesiredSize int `json:"desiredSize"`
+	DesiredSize *int `json:"desiredSize"`
 }
 
 func (s *SetDesiredSizeMessage) String() string {
 	bytes, _ := json.MarshalIndent(s, "", "  ")
 	return string(bytes)
+}
+
+// Validate validates a SetDesiredSizeMessage
+func (s *SetDesiredSizeMessage) Validate() error {
+	if s.DesiredSize == nil {
+		return fmt.Errorf("setDesiredSize message did not specify a desiredSize")
+	}
+	if *s.DesiredSize < 0 {
+		return fmt.Errorf("setDesiredSize message: desiredSize must be non-negative")
+	}
+	return nil
 }
 
 // TerminateMachineMessage is a cloudpool REST API message sent when POSTing
@@ -60,7 +71,15 @@ func (t *TerminateMachineMessage) String() string {
 	return string(bytes)
 }
 
-// PoolSize is a REST API message describes the current cloudpool size
+// Validate validates a TerminateMachineMessage
+func (t *TerminateMachineMessage) Validate() error {
+	if t.MachineID == "" {
+		return fmt.Errorf("terminateMachine message did not specify a machineId")
+	}
+	return nil
+}
+
+// PoolSizeMessage is a REST API message describes the current cloudpool size
 type PoolSizeMessage struct {
 	// Timestamp is the time at which the pool size observation was made.
 	Timestamp time.Time `json:"timestamp"`
