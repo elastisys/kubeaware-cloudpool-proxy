@@ -413,7 +413,7 @@ func TestGetMachineOnNotFoundError(t *testing.T) {
 // Exercise the scenario where a wrong cloudpool URL has been entered.
 // Should result in a proper error message.
 func TestConnectionToWrongURL(t *testing.T) {
-	poolClient := &DefaultCloudPoolClient{CloudPoolURL: "http://unknown-cloudpool:12345", Timeout: 1 * time.Second}
+	poolClient := &DefaultCloudPoolClient{CloudPoolURL: "http://unknown-cloudpool.elastisys.com:12345", Timeout: 1 * time.Second}
 	_, err := poolClient.GetPoolSize()
 	if err == nil {
 		t.Errorf("expected getMachine to fail")
@@ -425,7 +425,7 @@ func TestConnectionToWrongURL(t *testing.T) {
 	assert.Equal(t,
 		"getPoolSize: backend cloudpool request failed: failed to complete backend cloudpool request",
 		e.Message, "unexpected error message")
-	assert.True(t, strings.Contains(e.Detail, "no such host"), "unexpected error detail")
+	assert.True(t, strings.Contains(e.Detail, "no such host"), "unexpected error detail: %s", e.Detail)
 }
 
 func containsHeaders(actualHeaders map[string][]string, wantedHeaders map[string][]string) bool {
