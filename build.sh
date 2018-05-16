@@ -15,32 +15,32 @@ echo "[${scriptname}] building version ${version} ..."
 
 for arg in $@; do
     case ${arg} in
-	--nobin)
-	    build_binary=false
-	    ;;
-	--notest)
-	    run_tests=false
-	    ;;
-	--docker)
+        --nobin)
+            build_binary=false
+            ;;
+        --notest)
+            run_tests=false
+            ;;
+        --docker)
             build_docker_image=true
             ;;
-	--help)
-	    echo "usage: ${scriptname} [OPTIONS] [command ...]"
-	    echo ""
-	    echo "Builds one or more commands under cmd/ and optionally runs "
-	    echo "tests. If no commands are specified, all cmd/* are built."
-	    echo ""
-	    echo "Options:"
-	    echo "--nobin   Skip building command binary."
-	    echo "--notest  Skip tests."
+        --help)
+            echo "usage: ${scriptname} [OPTIONS] [command ...]"
+            echo ""
+            echo "Builds one or more commands under cmd/ and optionally runs "
+            echo "tests. If no commands are specified, all cmd/* are built."
+            echo ""
+            echo "Options:"
+            echo "--nobin   Skip building command binary."
+            echo "--notest  Skip tests."
             echo "--docker  Build a docker image."
-	    echo "--help    Print help message."
-	    exit 0
-	    ;;
-	*)
-	    # assume only positional arguments left
-	    break
-	    ;;
+            echo "--help    Print help message."
+            exit 0
+            ;;
+        *)
+            # assume only positional arguments left
+            break
+            ;;
     esac
     shift
 done
@@ -64,15 +64,15 @@ function build() {
 
 if ${build_binary}; then
     if [ "${1}" != "" ]; then
-	# build a particular (set of) command(s) given on command-line
-	for cmd in ${@}; do
-	    build ${cmd}
-	done
+        # build a particular (set of) command(s) given on command-line
+        for cmd in ${@}; do
+            build ${cmd}
+        done
     else
-	# build all commands
-	for cmd in $(ls ${scriptdir}/cmd); do
-	    build ${cmd}
-	done
+        # build all commands
+        for cmd in $(ls ${scriptdir}/cmd); do
+            build ${cmd}
+        done
     fi
 fi
 
@@ -81,15 +81,9 @@ if ${run_tests}; then
     coverage_dir=./build/coverage
     echo "[${scriptname}] running tests (writing coverage to ${coverage_dir}) ..."
     mkdir -p ${coverage_dir}
-    for pkg in $(ls pkg/); do
-	go test -cover -coverprofile=${coverage_dir}/${pkg}.out ./pkg/${pkg}
-	if [ -f ${coverage_dir}/${pkg}.out ]; then
-	    # output intended for codecov.io
-            cat ${coverage_dir}/${pkg}.out >> ${coverage_dir}/coverage.txt
-	fi
-    done
-
-    echo "[${scriptname}] to view coverage: go tool cover -html ${coverage_dir}/<pkg>.out"
+    # output intended for codecov.io
+    go test -cover -coverprofile=${coverage_dir}/coverage.txt ./pkg/...
+    echo "[${scriptname}] to view coverage: go tool cover -html ${coverage_dir}/coverage.txt"
 fi
 
 if ${build_docker_image}; then
@@ -98,10 +92,10 @@ if ${build_docker_image}; then
     # build for alpine (which uses a different libc)
     echo "[${scriptname}] building alpine-specific binary ..."
     CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo \
-	       -ldflags "-X main.version=${version}" \
-	       -o build/kubeaware-cloudpool-proxy-alpine \
-	       ./cmd/kubeaware-cloudpool-proxy
-		   
+               -ldflags "-X main.version=${version}" \
+               -o build/kubeaware-cloudpool-proxy-alpine \
+               ./cmd/kubeaware-cloudpool-proxy
+
     version=$(cat VERSION.txt)
     tag="elastisys/kubeaware-cloudpool-proxy:${version}"
     echo "[${scriptname}] building docker image ${tag} ..."
